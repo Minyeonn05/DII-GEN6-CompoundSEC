@@ -1,34 +1,50 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.util.List;
+import java.util.Map;
+
 
 public class AdminPanel extends JFrame {
-    private MultiFloorAccessControl accessControlSystem;
-
-    public AdminPanel(MultiFloorAccessControl accessControlSystem) {
+    public AdminPanel(Map<String, HotelAccessGUI. CardInfo> cardAccessMap, Map<String, List<String>> accessHistory) {
         super("Admin Panel");
-        this.accessControlSystem = accessControlSystem;
+        setLayout(new BorderLayout());
 
-        JTextArea logArea = new JTextArea(15, 30);
-        logArea.setEditable(false);
+        JTextArea historyArea = new JTextArea();
+        historyArea.setEditable(false);
+        updateHistoryText(historyArea, cardAccessMap, accessHistory);
 
-        JButton refreshButton = new JButton("Refresh Log");
-        refreshButton.addActionListener((ActionEvent e) -> {
-            logArea.setText(""); // Clear existing log
-            for (String log : accessControlSystem.getEventLog()) {
-                logArea.append(log + "\n");
-            }
+        JScrollPane scrollPane = new JScrollPane(historyArea);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JButton clearHistoryButton = new JButton("Clear History");
+        clearHistoryButton.addActionListener(e -> {
+            accessHistory.clear();
+            updateHistoryText(historyArea, cardAccessMap, accessHistory);
+            JOptionPane.showMessageDialog(this, "Access history cleared!", "Success", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        JPanel panel = new JPanel();
-        panel.add(refreshButton);
+        add(clearHistoryButton, BorderLayout.SOUTH);
 
-        setLayout(new BorderLayout());
-        add(new JScrollPane(logArea), BorderLayout.CENTER);
-        add(panel, BorderLayout.SOUTH);
-
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(400, 300);
+        setSize(500, 400);
         setVisible(true);
+    }
+
+    private void updateHistoryText(JTextArea historyArea, Map<String, HotelAccessGUI.CardInfo> cardAccessMap, Map<String, List<String>> accessHistory) {
+        StringBuilder historyText = new StringBuilder();
+        for (var entry : cardAccessMap.entrySet()) {
+            String cardId = entry.getKey();
+            HotelAccessGUI.CardInfo cardInfo = entry.getValue();
+            historyText.append("Card Name: ").append(cardInfo.getName())
+                    .append(" | ID: ").append(cardId)
+                    .append(" | Access Level: ").append(cardInfo.getAccessLevel())
+                    .append("\n");
+
+            if (accessHistory.containsKey(cardId)) {
+                for (String log : accessHistory.get(cardId)) {
+                    historyText.append("   -> ").append(log).append("\n");
+                }
+            }
+        }
+        historyArea.setText(historyText.toString());
     }
 }
