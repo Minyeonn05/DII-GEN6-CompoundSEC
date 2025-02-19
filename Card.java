@@ -1,46 +1,54 @@
-import java.util.UUID;
 import java.util.Date;
 
-// Abstract Class สำหรับ Card
-abstract class Card {
-    String cardId;
-    String accessLevel; // Low, Medium, High
-    Date expiryDate;
+
+public abstract class Card {
+    private String id;
+    private String accessLevel;
+    private Date expiryDate;
 
     public Card(String accessLevel, Date expiryDate) {
-        this.cardId = generateUniqueId();
         this.accessLevel = accessLevel;
         this.expiryDate = expiryDate;
     }
 
-    private String generateUniqueId() {
-        // ใช้ UUID ในการสร้าง ID ที่ไม่ซ้ำกัน
-        return UUID.randomUUID().toString();
+    public String getId() {
+        return id;
     }
 
-    public String getCardId() {
-        return cardId;
+    public void setId(String id) { // Setter for Card ID
+        this.id = id;
     }
 
     public String getAccessLevel() {
         return accessLevel;
     }
 
-    public boolean isExpired() {
-        return expiryDate.before(new Date()); // ตรวจสอบวันหมดอายุ
+    public Date getExpiryDate() {
+        return expiryDate;
     }
-}
 
+    public abstract String getCardType(); // Abstract method for card type
+}
 
 class EmployeeCard extends Card {
     public EmployeeCard(String accessLevel, Date expiryDate) {
         super(accessLevel, expiryDate);
     }
+
+    @Override
+    public String getCardType() {
+        return "Employee";
+    }
 }
 
-
-class VisitorCard extends Card {
+ class VisitorCard extends Card {
     public VisitorCard(String accessLevel, Date expiryDate) {
         super(accessLevel, expiryDate);
     }
+
+    @Override
+    public String getCardType() {
+        return "Visitor";
+    }
 }
+
