@@ -5,14 +5,15 @@ import java.util.*;
 import java.util.List;
 
 public class AdminPanel extends JFrame {
-    private Map<String, HotelAccessGUI.CardInfo> cardAccessMap;
-    private Map<String, List<String>> accessHistory;
-    private JTextArea historyArea;
-    private JTextField cardIdField, newNameField;
-    private JComboBox<String> accessLevelComboBox;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final Map<String, Card> cardAccessMap;
+    private final Map<String, List<String>> accessHistory;
+    private final JTextArea historyArea;
+    private final JTextField cardIdField, newNameField;
+    private final JComboBox<String> accessLevelComboBox;
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    public AdminPanel(Map<String, HotelAccessGUI.CardInfo> cardAccessMap, Map<String, List<String>> accessHistory) {
+    public AdminPanel(Map<String, Card> cardAccessMap,
+                      Map<String, List<String>> accessHistory) {
         super("Admin Panel");
         this.cardAccessMap = cardAccessMap;
         this.accessHistory = accessHistory;
@@ -26,7 +27,7 @@ public class AdminPanel extends JFrame {
         JScrollPane scrollPane = new JScrollPane(historyArea);
         add(scrollPane, BorderLayout.CENTER);
 
-        JPanel modifyPanel = new JPanel(new GridLayout(4, 2, 10, 10));
+        JPanel modifyPanel = new JPanel(new GridLayout(5, 2, 10, 10));
 
         modifyPanel.add(new JLabel("Card ID:"));
         cardIdField = new JTextField();
@@ -42,8 +43,9 @@ public class AdminPanel extends JFrame {
 
         JButton modifyButton = new JButton("Modify Card");
         modifyButton.addActionListener(e -> modifyCard());
-
+        modifyButton.setEnabled(true);
         modifyPanel.add(modifyButton);
+
         add(modifyPanel, BorderLayout.SOUTH);
 
         setSize(600, 500);
@@ -51,6 +53,7 @@ public class AdminPanel extends JFrame {
     }
 
     private void modifyCard() {
+
         String cardId = cardIdField.getText().trim();
         String newName = newNameField.getText().trim();
         String newAccessLevel = (String) accessLevelComboBox.getSelectedItem();
@@ -60,28 +63,23 @@ public class AdminPanel extends JFrame {
             return;
         }
 
-        HotelAccessGUI.CardInfo card = cardAccessMap.get(cardId);
-        String timestamp = dateFormat.format(new Date()); // Capture timestamp
+        Card card = cardAccessMap.get(cardId);
+        String timestamp = dateFormat.format(new Date());
 
-        // Allow all users to change the name
         if (!newName.isEmpty()) {
-            String logEntry = timestamp + " | Name changed from " + card.getName() + " to " + newName;
             card.setName(newName);
-            accessHistory.computeIfAbsent(cardId, k -> new ArrayList<>()).add(logEntry);
+            accessHistory.computeIfAbsent(cardId, k -> new ArrayList<>()).add(timestamp + " | Name changed to " + newName);
         }
 
-        // Check if the current user is an admin before changing access level
-        String adminId = JOptionPane.showInputDialog(this, "Enter Admin ID (leave blank if not admin):");
-
-        if (adminId != null && adminId.equals(Config.ADMIN_ID)) {
-            String logEntry = timestamp + " | Access Level changed from " + card.getAccessLevel() + " to " + newAccessLevel;
+        if ("Visitor".equals(card.getName())) {
+            card.setAccessLevel("Low");
+            JOptionPane.showMessageDialog(this, "Visitors can only have Low access!", "Warning", JOptionPane.WARNING_MESSAGE);
+        } else {
             card.setAccessLevel(newAccessLevel);
-            accessHistory.computeIfAbsent(cardId, k -> new ArrayList<>()).add(logEntry);
-            JOptionPane.showMessageDialog(this, "Access level updated successfully!", "Success", JOptionPane.INFORMATION_MESSAGE);
-        } else if (adminId != null) {
-            JOptionPane.showMessageDialog(this, "You are not authorized to change access level!", "Error", JOptionPane.WARNING_MESSAGE);
         }
 
+        accessHistory.computeIfAbsent(cardId, k -> new ArrayList<>()).add(timestamp + " | Access Level changed to " + card.getAccessLevel());
+        JOptionPane.showMessageDialog(this, "Modification Successful!", "Success", JOptionPane.INFORMATION_MESSAGE);
         updateHistoryText();
     }
 
@@ -90,20 +88,24 @@ public class AdminPanel extends JFrame {
 
         for (var entry : cardAccessMap.entrySet()) {
             String cardId = entry.getKey();
-            HotelAccessGUI.CardInfo cardInfo = entry.getValue();
+            Card cardInfo = entry.getValue();
+
 
             historyText.append("\nCard ID: ").append(cardId)
                     .append(" | Name: ").append(cardInfo.getName())
                     .append(" | Access Level: ").append(cardInfo.getAccessLevel())
+                    .append(" | Card Type: ").append(cardInfo.getCardType()) // Include card type
                     .append("\n");
 
+            // Include modification history for this card
             if (accessHistory.containsKey(cardId)) {
                 for (String log : accessHistory.get(cardId)) {
                     historyText.append("   -> ").append(log).append("\n");
                 }
             }
         }
+
         historyArea.setText(historyText.toString());
     }
-
 }
+
