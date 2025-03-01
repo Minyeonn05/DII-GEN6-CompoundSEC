@@ -12,10 +12,11 @@ public class HotelAccessGUI extends JFrame {
     private JComboBox<String> cardTypeComboBox, accessLevelComboBox;
     private static final Map<String, Card> cardAccessMap = new HashMap<>();
     private static final Map<String, List<String>> accessHistory = new HashMap<>();
+    private JTextArea historyArea;
 
     public HotelAccessGUI() {
         super("Hotel Access Control System");
-        loadLogs(); // Load logs when the program starts
+         // Load logs when the program starts
         setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
@@ -301,11 +302,13 @@ public class HotelAccessGUI extends JFrame {
     }
     private void loadLogs() {
         try (Scanner scanner = new Scanner(new File("access_log.txt"))) {
+            StringBuilder logContent = new StringBuilder();
             while (scanner.hasNextLine()) {
-                System.out.println(scanner.nextLine());
+                logContent.append(scanner.nextLine()).append("\n");
             }
+            historyArea.setText(logContent.toString()); // Display logs in the JTextArea
         } catch (IOException e) {
-            System.out.println("No previous logs found. Starting fresh...");
+            historyArea.setText("No previous logs found. Starting fresh...\n");
         }
     }
 
