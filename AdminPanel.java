@@ -55,6 +55,14 @@ public class AdminPanel extends JFrame {
 
         setSize(600, 500);
         setVisible(true);
+        // Add Refresh History Button
+        JButton refreshHistoryButton = new JButton("Refresh History");
+        refreshHistoryButton.addActionListener(e -> {
+            loadLogs();
+            updateHistoryText();
+        });
+        add(refreshHistoryButton, BorderLayout.NORTH);
+
     }
 
     // ✅ Modify Card: Change name and access level
@@ -108,27 +116,30 @@ public class AdminPanel extends JFrame {
 
     // ✅ Update JTextArea with current access history
     private void updateHistoryText() {
-        StringBuilder historyText = new StringBuilder("=== Access Modification Log ===\n");
+        StringBuilder historyText = new StringBuilder(historyArea.getText()); // Keep current content
 
         for (var entry : cardAccessMap.entrySet()) {
             String cardId = entry.getKey();
             Card cardInfo = entry.getValue();
 
-            historyText.append("\nCard ID: ").append(cardId)
-                    .append(" | Name: ").append(cardInfo.getName())
-                    .append(" | Access Level: ").append(cardInfo.getAccessLevel())
-                    .append(" | Card Type: ").append(cardInfo.getCardType())
-                    .append("\n");
+            if (!historyText.toString().contains("Card ID: " + cardId)) { // Avoid duplicates
+                historyText.append("\nCard ID: ").append(cardId)
+                        .append(" | Name: ").append(cardInfo.getName())
+                        .append(" | Access Level: ").append(cardInfo.getAccessLevel())
+                        .append(" | Card Type: ").append(cardInfo.getCardType())
+                        .append("\n");
 
-            if (accessHistory.containsKey(cardId)) {
-                for (String log : accessHistory.get(cardId)) {
-                    historyText.append("   -> ").append(log).append("\n");
+                if (accessHistory.containsKey(cardId)) {
+                    for (String log : accessHistory.get(cardId)) {
+                        historyText.append("   -> ").append(log).append("\n");
+                    }
                 }
             }
         }
 
         historyArea.setText(historyText.toString());
     }
+
 
     // ✅ Save current access history to access_log.txt
     private void saveHistoryToFile() {

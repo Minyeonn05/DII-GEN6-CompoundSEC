@@ -1,13 +1,5 @@
 === Access Modification Log ===
 
-Card ID: 2516 | Name: Niuliu | Access Level: High | Card Type: Employee
-   -> 2025-03-01 11:57:00 | Card Created: Card ID: 2516, Name: Niu, Type: Employee, Access Level: Low
-   -> 2025-03-01 11:57:17 | Name changed to Niuliu
-   -> 2025-03-01 11:57:17 | Access Level changed to High
-
-====================================
-=== Access Modification Log ===
-
 Card ID: 20005 | Name: Minyeonn | Access Level: All | Card Type: Employee
    -> 2025-03-01 11:57:37 | Card Created: Card ID: 20005, Name: Min, Type: Employee, Access Level: Low
    -> 2025-03-01 11:57:52 | Name changed to Minyeonn
