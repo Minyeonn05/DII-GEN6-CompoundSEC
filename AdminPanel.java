@@ -51,6 +51,12 @@ public class AdminPanel extends JFrame {
         modifyButton.addActionListener(e -> modifyCard());
         modifyPanel.add(modifyButton);
 
+        // Add Remove Card Button
+        JButton removeCardButton = new JButton("Remove Card");
+        removeCardButton.addActionListener(e -> removeCard());
+        modifyPanel.add(removeCardButton);
+
+
         add(modifyPanel, BorderLayout.SOUTH);
 
         setSize(600, 500);
@@ -168,4 +174,48 @@ public class AdminPanel extends JFrame {
             JOptionPane.showMessageDialog(this, "Error Saving Log!", "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
+    private void removeCard() {
+        String cardId = JOptionPane.showInputDialog(this, "Enter Card ID to Remove:");
+
+        if (cardId == null || cardId.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Operation canceled. No Card ID provided.", "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        cardId = cardId.trim();
+
+        if (!cardAccessMap.containsKey(cardId)) {
+            JOptionPane.showMessageDialog(this, "Card ID not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // Confirm before deletion
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Are you sure you want to remove Card ID: " + cardId + "?",
+                "Confirm Deletion", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            // Remove the card from the maps
+            cardAccessMap.remove(cardId);
+            accessHistory.remove(cardId);
+
+            // Log the removal action
+            logCardRemoval(cardId);
+
+            // Update UI and log file
+            updateHistoryText();
+            saveHistoryToFile();
+
+            JOptionPane.showMessageDialog(this, "Card successfully removed!", "Success", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    private void logCardRemoval(String cardId) {
+        try (FileWriter writer = new FileWriter("access_log.txt", true)) {
+            String timestamp = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+            writer.write("Card ID: " + cardId + " | Removed at " + timestamp + "\n");
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error logging card removal!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
 }
